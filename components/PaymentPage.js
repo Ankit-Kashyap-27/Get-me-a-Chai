@@ -10,11 +10,18 @@ const PaymentPage = ({ username }) => {
     // const {data:session}=useSession()
 
     const [paymentform, setPaymentform] = useState({})
+    const [currentUser, setcurrentUser] = useState({})
+
 
     const handleChange = (e) => {
         setPaymentform({ ...paymentform, [e.target.name]: e.target.value })
+        console.log(paymentform)
     }
     
+    const getData =async (params)=>{
+     let u=await fetchuser(username)
+     setcurrentUser(u)
+    }
 
     const pay = async (amount) => {
     
@@ -23,14 +30,14 @@ const PaymentPage = ({ username }) => {
         let orderId = a.id
 
         var options = {
-            "key": "process.env.KEY_ID", // Enter the Key ID generated from the Dashboard
-            "amount": "amount", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            "key": process.env.NEXT_PUBLIC_KEY_ID, // Enter the Key ID generated from the Dashboard
+            "amount": amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
             "currency": "INR",
             "name": "Get Me A Chai", //your business name
             "description": "Test Transaction",
             "image": "https://example.com/your_logo",
             "order_id": orderId, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-            "callback_url": `${process.env.URL}/api/razorpay`,
+            "callback_url": `${process.env.NEXT_PUBLIC_URL}/api/razorpay`,
             "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
                 "name": "Gaurav Kumar", //your customer's name
                 "email": "gaurav.kumar@example.com",
@@ -43,14 +50,14 @@ const PaymentPage = ({ username }) => {
                 "color": "#3399cc"
             }
         };
-        var rzp1 = new Razorpay(options);
+        var rzp1 = new  window.Razorpay(options);
         rzp1.open();
 
     }
 
     return (
         <>
-            <button id="rzp-button1">Pay</button>
+  
             <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
 
 
