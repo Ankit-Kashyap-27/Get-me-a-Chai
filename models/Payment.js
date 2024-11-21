@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { stringify } from "postcss";
+import Razorpay from "razorpay";
 const { Schema, model } = mongoose;
 
 const PaymentSchema = new Schema({
@@ -9,6 +11,8 @@ const PaymentSchema = new Schema({
     amount: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }, 
+    razorpayid:{type:String},
+    razorpaysecret:{type:String},
     done: { type: Boolean, default: false },
     });
 

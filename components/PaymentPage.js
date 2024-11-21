@@ -1,9 +1,9 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import Script from 'next/script'
-import { initiate } from '@/actions/useractions'
+import { fetchpayments, fetchuser, initiate } from '@/actions/useractions'
 import { useSession } from 'next-auth/react'
 
 const PaymentPage = ({ username }) => {
@@ -11,20 +11,29 @@ const PaymentPage = ({ username }) => {
 
     const [paymentform, setPaymentform] = useState({})
     const [currentUser, setcurrentUser] = useState({})
+    const [payments, setPayments] = useState([])
+
+    useEffect(() => {
+        getData()
+    }, [])
+
 
 
     const handleChange = (e) => {
         setPaymentform({ ...paymentform, [e.target.name]: e.target.value })
         console.log(paymentform)
     }
-    
-    const getData =async (params)=>{
-     let u=await fetchuser(username)
-     setcurrentUser(u)
+
+    const getData = async (params) => {
+        let u = await fetchuser(username)
+        setcurrentUser(u)
+        let dbpayments = await fetchpayments(username)
+        setPayments(dbpayments)
+        console.log(u, dbpayments)
     }
 
     const pay = async (amount) => {
-    
+
         //Get the order ID
         let a = await initiate(amount, username, paymentform)
         let orderId = a.id
@@ -50,14 +59,14 @@ const PaymentPage = ({ username }) => {
                 "color": "#3399cc"
             }
         };
-        var rzp1 = new  window.Razorpay(options);
+        var rzp1 = new Razorpay(options);
         rzp1.open();
 
     }
 
     return (
         <>
-  
+
             <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
 
 
@@ -79,33 +88,11 @@ const PaymentPage = ({ username }) => {
                     <div className="supporters bg-slate-900 w-1/2 rounded-lg p-7 h-[60vh] overflow-auto scrollbar-hide ">
                         <h2 className='text-2xl  font-bold  my-5'>Supporters</h2>
                         <ul className='mx-5'>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
-                            <li className='my-4 mb-2 flex gap-2 items-center' >
-                                <img width={35} src="/avatar.gif" alt="Avatar" />
-                                <span> Node donated <span className='font-bold'>$30</span> with a messgae: " ❤️ From NODE "</span></li>
+                            {payments.map((p, i) => {
+                                return <li className='my-4 mb-2 flex gap-2 items-center' >
+                                    <img width={35} src="/avatar.gif" alt="Avatar" />
+                                    <span> {p.name} donated <span className='font-bold'>₹{p.amount}</span> with a messgae: "{p.message}"</span></li>
+                            })}
 
                         </ul>
                     </div>
@@ -113,11 +100,11 @@ const PaymentPage = ({ username }) => {
                         <h2 className='text-2xl font-bold my-5'>Make a Payment</h2>
                         <div className="flex gap-2 flex-col">
                             <div>
-                            <input onChange={handleChange} value={paymentform.name} type="" name='name' className='w-full p-3 rounded-lg bg-slate-800' placeholder='Enter Name' />
+                                <input onChange={handleChange} value={paymentform.name} type="" name='name' className='w-full p-3 rounded-lg bg-slate-800' placeholder='Enter Name' />
                             </div>
                             <input onChange={handleChange} value={paymentform.message} type="" name='message' className='w-full p-3 rounded-lg bg-slate-800' placeholder='Enter Message' />
-                                <input onChange={handleChange} value={paymentform.amount} type="" name='amount' className='w-full p-3 rounded-lg bg-slate-800' placeholder='Enter Amount' />
-                            <button type="button" className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center  m-2">Pay</button>
+                            <input onChange={handleChange} value={paymentform.amount} type="" name='amount' className='w-full p-3 rounded-lg bg-slate-800' placeholder='Enter Amount' />
+                            <button onClick={()=>pay(Number.parseInt( paymentform.amount)*100)} type="button" className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center  m-2">Pay</button>
                         </div>
                         <div className='flex gap-2 mt-5'>
                             <button className='bg-slate-800 p-3 rounded-lg' onClick={() => pay(1000)} >Pay ₹10</button>
@@ -127,7 +114,7 @@ const PaymentPage = ({ username }) => {
 
                     </div>
                 </div>
-            </div> onClick={() => pay(10)}
+            </div>
 
         </>
     )
